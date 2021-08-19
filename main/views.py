@@ -38,13 +38,21 @@ class PostViewSet(PermissionMixin, viewsets.ModelViewSet):
         return context
 
     @action(detail=False, methods=['get'])
+    def my(self, request, pk=None):
+        queryset = self.get_queryset()
+        queryset = queryset.filter(author=request.user)
+        serializer = PostSerializer(queryset, many=True, context={'request': request})
+        return Response(serializer.data, 200)
+
+
+    @action(detail=False, methods=['get'])
     def search(self, request, pk=None):
         q = request.query_params.get('q')
         queryset = self.get_queryset()
         queryset = queryset.filter(Q(title__icontains=q)|
                                    Q(text__icontains=q))
         serializer = PostSerializer(queryset, many=True, context={'request': request})
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.data, 200)
 
 
 class PostImageView(generics.ListCreateAPIView):

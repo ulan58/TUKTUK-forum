@@ -25,11 +25,10 @@ class PostSerializer(serializers.ModelSerializer):
         representation = super().to_representation(instance)
         representation['images'] = PostImageSerializer(instance.images.all(), many=True).data
         action = self.context.get('action')
-        # print(action)
+        ReplySerializer.action = action
         if action == 'list':
             representation['replies'] = instance.replies.count()
         elif action == 'retrieve':
-            ReplySerializer.action = action
             representation['replies'] = ReplySerializer(instance.replies.all(), many=True).data
         return representation
 
