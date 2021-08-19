@@ -29,6 +29,7 @@ class PostSerializer(serializers.ModelSerializer):
         if action == 'list':
             representation['replies'] = instance.replies.count()
         elif action == 'retrieve':
+            ReplySerializer.action = action
             representation['replies'] = ReplySerializer(instance.replies.all(), many=True).data
         return representation
 
@@ -64,7 +65,8 @@ class ReplySerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         representation = super(ReplySerializer, self).to_representation(instance)
-        action = self.context.get('action')
+        action = self.action
+        # print("Reply", action)
         if action == 'list':
             representation['comments'] = instance.comments.count()
         elif action == 'retrieve':
@@ -97,4 +99,10 @@ class CommentSerializer(serializers.ModelSerializer):
         )
         return comment
 
-
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        action = self.context.get('action')
+        # print("Comment", action)
+        if action == 'list':
+            representation['inner_comments'] = instance.comments.count()
+        return representation

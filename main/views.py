@@ -68,3 +68,8 @@ class ReplyViewSet(PermissionMixin, ModelViewSet):
 class CommentViewSet(PermissionMixin, ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['action'] = self.action
+        return context
