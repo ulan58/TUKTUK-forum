@@ -17,7 +17,7 @@ class Category(models.Model):
 
 class Post(models.Model):
     author = models.ForeignKey(MyUser, on_delete=models.CASCADE, related_name='posts')
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='posts')
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='category')
     title = models.CharField(max_length=150)
     text = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
@@ -32,7 +32,7 @@ class PostImage(models.Model):
 
 
 class Reply(models.Model):
-    problem = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='replies')
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='replies')
     author = models.ForeignKey(MyUser, on_delete=models.CASCADE, related_name='replies')
     body = models.TextField()
     image = models.ImageField(upload_to='reply_images')

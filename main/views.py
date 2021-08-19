@@ -11,14 +11,31 @@ from .permissions import IsAuthorPermission
 from .serializers import *
 
 
+class PermissionMixin:
+    def get_permissions(self):
+        if self.action == 'create':
+            permissions = [IsAuthenticated, ]
+        elif self.action in ['update', 'partial_update', 'destroy']:
+            permissions = [IsAuthorPermission, ]
+        else:
+            permissions = []
+        return [permission() for permission in permissions]
+
+
+
 class CategoryListView(generics.ListAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
 
 
-class PostViewSet(viewsets.ModelViewSet):
+class PostViewSet(PermissionMixin, viewsets.ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['action'] = self.action
+        return context
 
     @action(detail=False, methods=['get'])
     def search(self, request, pk=None):
@@ -36,17 +53,6 @@ class PostImageView(generics.ListCreateAPIView):
 
     def get_serializer_context(self):
         return {'request': self.request}
-
-
-class PermissionMixin:
-    def get_permissions(self):
-        if self.action == 'create':
-            permissions = [IsAuthenticated, ]
-        elif self.action in ['update', 'partial_update', 'destroy']:
-            permissions = [IsAuthorPermission, ]
-        else:
-            permissions = []
-        return [permission() for permission in permissions]
 
 
 class ReplyViewSet(PermissionMixin, ModelViewSet):
