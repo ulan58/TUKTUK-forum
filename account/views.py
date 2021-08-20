@@ -32,7 +32,7 @@ class ActivationView(APIView):
 class ForgotPasswordView(APIView):
     def get(self, request):
         email = request.query_params.get('email')
-        user = get_object_or_404(CustomUser, email=email)
+        user = get_object_or_404(MyUser, email=email)
         user.is_active = False
         user.create_activation_code()
         user.save()

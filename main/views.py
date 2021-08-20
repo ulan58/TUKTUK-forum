@@ -22,7 +22,6 @@ class PermissionMixin:
         return [permission() for permission in permissions]
 
 
-
 class CategoryListView(generics.ListAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
@@ -44,12 +43,11 @@ class PostViewSet(PermissionMixin, viewsets.ModelViewSet):
         serializer = PostSerializer(queryset, many=True, context={'request': request})
         return Response(serializer.data, 200)
 
-
     @action(detail=False, methods=['get'])
     def search(self, request, pk=None):
         q = request.query_params.get('q')
         queryset = self.get_queryset()
-        queryset = queryset.filter(Q(title__icontains=q)|
+        queryset = queryset.filter(Q(title__icontains=q) |
                                    Q(text__icontains=q))
         serializer = PostSerializer(queryset, many=True, context={'request': request})
         return Response(serializer.data, 200)
@@ -81,3 +79,27 @@ class CommentViewSet(PermissionMixin, ModelViewSet):
         context = super().get_serializer_context()
         context['action'] = self.action
         return context
+
+
+class StarRatingView(PermissionMixin, ModelViewSet):
+    queryset = Rating.objects.all()
+    serializer_class = CreateRatingSerializer
+
+    def post(self, request):
+        serializer = CreateRatingSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(201)
+
+
+class LikesView(PermissionMixin, ModelViewSet):
+    queryset = Likes.objects.all()
+    serializer_class = LikeSerializer
+
+    @action(detail=False, methods=['get'])
+    def favorite(self, request, pk=None):
+        queryset = self.get_queryset()
+        queryset = queryset.filter(author=request.user)
+        serializer = LikeSerializer(queryset, many=True,
+                                    context={'request': request})
+        return Response(serializer.data, 200)

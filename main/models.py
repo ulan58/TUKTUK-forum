@@ -2,6 +2,7 @@ from django.db import models
 
 # Create your models here.
 from django.db import models
+from rest_framework import settings
 
 from account.models import MyUser
 
@@ -56,3 +57,25 @@ class Comment(models.Model):
 
     class Meta:
         ordering = ('created',)
+
+
+class Rating(models.Model):
+    posts = models.ForeignKey(Post, on_delete=models.CASCADE,
+                            related_name='rating')
+    author = models.ForeignKey(MyUser, on_delete=models.CASCADE,
+                               related_name='rating')
+    star = models.IntegerField('value', default=0)
+
+    def __str__(self):
+        return f'{self.star} - {self.posts}'
+
+    class Meta:
+        verbose_name = 'Rating'
+        verbose_name_plural = 'Ratings'
+
+
+class Likes(models.Model):
+    liked_posts = models.ForeignKey(Post, on_delete=models.CASCADE,
+                                  related_name='posts_likes')
+    author = models.ForeignKey(MyUser, on_delete=models.CASCADE,
+                               related_name='author_likes')
